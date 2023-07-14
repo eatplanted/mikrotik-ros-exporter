@@ -1,0 +1,5 @@
+---
+credentials:
+  default:
+    username: monitoring
+    password: changeme
