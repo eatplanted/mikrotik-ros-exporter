@@ -1,6 +1,6 @@
 # mikrotik-ros-exporter
 
-A simple Prometheus exporter for microtic devices.
+A simple Prometheus exporter for Mikrotik devices.
 
 This exporter works similar to the [Blackbox Exporter] (https://github.com/prometheus/blackbox_exporter) where you can specify different targets in Prometheus to scrape Mikrotik devices through this exporter.
 
