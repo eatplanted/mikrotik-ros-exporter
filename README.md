@@ -2,7 +2,7 @@
 
 A simple Prometheus exporter for Mikrotik devices.
 
-This exporter works similar to the [Blackbox Exporter] (https://github.com/prometheus/blackbox_exporter) where you can specify different targets in Prometheus to scrape Mikrotik devices through this exporter.
+This exporter works similar to the [Blackbox Exporter](https://github.com/prometheus/blackbox_exporter) where you can specify different targets in Prometheus to scrape Mikrotik devices through this exporter.
 
 ## Configuration
 
@@ -20,7 +20,7 @@ The timeout is automatically determined from the `scrape_timeout` in the [Promet
 
 ## Prometheus Configuration
 
-The Mikrotik RouterOS Exporter implements the multi-target exporter pattern, therefore we recommend reading the guide [Understanding and using the multi-target exporter pattern] (https://prometheus.io/docs/guides/multi-target-exporter/) to get an overview of the configuration.
+The Mikrotik RouterOS Exporter implements the multi-target exporter pattern, therefore we recommend reading the guide [Understanding and using the multi-target exporter pattern](https://prometheus.io/docs/guides/multi-target-exporter/) to get an overview of the configuration.
 
 The target must be passed to the Mikrotik RouterOS Exporter as a parameter, this can be done with relabelling.
 
