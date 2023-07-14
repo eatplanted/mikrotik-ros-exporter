@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	"github.com/eatplanted/mikrotik-ros-exporter/internal/config"
 	"github.com/eatplanted/mikrotik-ros-exporter/internal/server"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func main() {
-	portPtr := flag.Int("port", 8080, "Listening Port")
+	portPtr := flag.Int("port", 9142, "Listening Port")
 	configFilePtr := flag.String("config", "", "ConfigFile")
 	flag.Parse()
 
