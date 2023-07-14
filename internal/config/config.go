@@ -2,8 +2,9 @@ package config
 
 import (
 	"errors"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Credential struct {
@@ -12,6 +13,7 @@ type Credential struct {
 }
 
 type Configuration struct {
+	Timeout     float64
 	Credentials map[string]Credential `yaml:"credentials"`
 }
 

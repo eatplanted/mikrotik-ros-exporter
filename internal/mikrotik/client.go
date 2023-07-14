@@ -7,6 +7,7 @@ import (
 )
 
 type Configuration struct {
+	Timeout  float64
 	Address  string
 	Port     int
 	Username string
@@ -27,7 +28,7 @@ func NewClient(configuration Configuration) Client {
 	return &client{
 		configuration: configuration,
 		httpClient: http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(configuration.Timeout) * time.Second,
 		},
 	}
 }

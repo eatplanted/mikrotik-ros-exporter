@@ -1,11 +1,19 @@
 package server
 
 import (
+	"net/http"
+	"strconv"
+
+	"github.com/eatplanted/mikrotik-ros-exporter/internal/config"
 	"github.com/eatplanted/mikrotik-ros-exporter/internal/metrics"
 	"github.com/eatplanted/mikrotik-ros-exporter/internal/mikrotik"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+)
+
+const (
+	defaultTimeout = 120
+	timeoutOffset  = 0.5
 )
 
 func (s *server) probeHandler() http.HandlerFunc {
@@ -23,7 +31,18 @@ func (s *server) probeHandler() http.HandlerFunc {
 			return
 		}
 
+		timeout, err := getTimeout(r, s.config)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.WithFields(log.Fields{
+				"target":     target,
+				"credential": credentialName,
+			}).WithError(err).Error("failed to get timeout")
+			return
+		}
+
 		client := mikrotik.NewClient(mikrotik.Configuration{
+			Timeout:  timeout,
 			Address:  target,
 			Username: credential.Username,
 			Password: credential.Password,
@@ -44,4 +63,26 @@ func (s *server) probeHandler() http.HandlerFunc {
 		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 		handler.ServeHTTP(w, r)
 	}
+}
+
+func getTimeout(r *http.Request, configuration config.Configuration) (timeout float64, err error) {
+	if value := r.Header.Get("X-Prometheus-Scrape-Timeout-Seconds"); value != "" {
+		var err error
+		timeout, err = strconv.ParseFloat(value, 64)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	if timeout == 0 {
+		timeout = defaultTimeout
+	}
+
+	adjustedTimeout := timeout - timeoutOffset
+
+	if configuration.Timeout < adjustedTimeout && configuration.Timeout > 0 || adjustedTimeout < 0 {
+		return configuration.Timeout, nil
+	}
+
+	return adjustedTimeout, nil
 }

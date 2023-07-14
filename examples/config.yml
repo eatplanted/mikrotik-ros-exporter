@@ -1,4 +1,5 @@
 ---
+timeout: 30
 credentials:
   default:
     username: monitoring
