@@ -1,7 +1,5 @@
 .PHONY:  build clean dev test release
 
-VERSION=0.1.0
-
 default: build
 
 build: clean
