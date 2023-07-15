@@ -27,7 +27,7 @@ func TestPrometheusTimeoutHTTPHeader(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	request.Header.Set("X-Prometheus-Scrape-Timeout-Seconds", "1")
+	request.Header.Set("X-Prometheus-Scrape-Timeout-Seconds", "2")
 
 	recorder := httptest.NewRecorder()
 	server := NewServer(config.Configuration{
