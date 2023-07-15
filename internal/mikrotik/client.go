@@ -9,7 +9,6 @@ import (
 type Configuration struct {
 	Timeout  float64
 	Address  string
-	Port     int
 	Username string
 	Password string
 }
