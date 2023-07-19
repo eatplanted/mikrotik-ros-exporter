@@ -41,10 +41,11 @@ scrape_configs:
     metrics_path: /probe
     params:
       credential: [default]
+      skip_tls_verify: [false]
     static_configs:
       - targets:
-          - 10.0.1.1
-          - 10.0.20.1:8081
+        - https://10.0.1.1
+        - http://10.0.20.1:8081
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

@@ -1,16 +1,18 @@
 package mikrotik
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
 )
 
 type Configuration struct {
-	Timeout  float64
-	Address  string
-	Username string
-	Password string
+	Timeout       float64
+	Address       string
+	SkipTLSVerify bool
+	Username      string
+	Password      string
 }
 
 type Client interface {
@@ -24,10 +26,16 @@ type client struct {
 }
 
 func NewClient(configuration Configuration) Client {
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: configuration.SkipTLSVerify,
+		},
+	}
 	return &client{
 		configuration: configuration,
 		httpClient: http.Client{
-			Timeout: time.Duration(configuration.Timeout) * time.Second,
+			Transport: transport,
+			Timeout:   time.Duration(configuration.Timeout) * time.Second,
 		},
 	}
 }
@@ -45,5 +53,5 @@ func (c client) get(path string) (*http.Response, error) {
 }
 
 func (c client) buildURL(path string) string {
-	return fmt.Sprintf("http://%s/rest%s", c.configuration.Address, path)
+	return fmt.Sprintf("%s/rest%s", c.configuration.Address, path)
 }
