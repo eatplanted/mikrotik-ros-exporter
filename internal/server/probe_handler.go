@@ -20,6 +20,7 @@ func (s *server) probeHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		target := r.URL.Query().Get("target")
 		credentialName := r.URL.Query().Get("credential")
+		skipTLSVerify := r.URL.Query().Get("skip_tls_verify") == "true"
 
 		credential, err := s.config.FindCredential(credentialName)
 		if err != nil {
@@ -42,10 +43,11 @@ func (s *server) probeHandler() http.HandlerFunc {
 		}
 
 		client := mikrotik.NewClient(mikrotik.Configuration{
-			Timeout:  timeout,
-			Address:  target,
-			Username: credential.Username,
-			Password: credential.Password,
+			Timeout:       timeout,
+			Address:       target,
+			SkipTLSVerify: skipTLSVerify,
+			Username:      credential.Username,
+			Password:      credential.Password,
 		})
 
 		registry, err := metrics.CreateRegistryWithMetrics(client)
