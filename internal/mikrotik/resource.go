@@ -18,7 +18,7 @@ type Resource struct {
 	WriteSectTotal       float64 `json:"write-sect-total,string"`
 }
 
-func (c client) GetResource() (Resource, error) {
+func (c *client) GetResource() (Resource, error) {
 	resp, err := c.get("/system/resource")
 	if err != nil {
 		return Resource{}, err

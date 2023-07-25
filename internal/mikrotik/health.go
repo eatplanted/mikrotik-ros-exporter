@@ -19,7 +19,7 @@ type response struct {
 	Value string `json:"value"`
 }
 
-func (c client) GetHealth() (Health, error) {
+func (c *client) GetHealth() (Health, error) {
 	resp, err := c.get("/system/health")
 	if err != nil {
 		return Health{}, err
