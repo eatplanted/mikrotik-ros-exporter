@@ -55,7 +55,7 @@ func (s *server) probeHandler() http.HandlerFunc {
 			log.WithFields(log.Fields{
 				"target":     target,
 				"credential": credentialName,
-			}).WithError(err).Error("failed to get health")
+			}).WithError(err).Error("failed to create registry")
 
 			// We don't return here because the registry is still valid
 			// and contains a mikrotik_probe_success metric which is
