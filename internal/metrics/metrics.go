@@ -17,16 +17,25 @@ func CreateRegistryWithMetrics(client mikrotik.Client) (*prometheus.Registry, er
 	registry.MustRegister(probeMetric)
 
 	if err := setHealthMetrics(client, registry); err != nil {
-		probeMetric.Set(0)
-		return registry, err
+		return createDefaultErrorRegistry(), err
+	}
+
+	if err := setInterfacesMetrics(client, registry); err != nil {
+		return createDefaultErrorRegistry(), err
 	}
 
 	if err := setResourceMetrics(client, registry); err != nil {
-		probeMetric.Set(0)
-		return registry, err
+		return createDefaultErrorRegistry(), err
 	}
 
 	return registry, nil
+}
+
+func createDefaultErrorRegistry() *prometheus.Registry {
+	errorRegistry := prometheus.NewRegistry()
+	errorRegistry.MustRegister(probeMetric)
+	probeMetric.Set(0)
+	return errorRegistry
 }
 
 func setHealthMetrics(client mikrotik.Client, registry *prometheus.Registry) error {
@@ -48,6 +57,84 @@ func setHealthMetrics(client mikrotik.Client, registry *prometheus.Registry) err
 	})
 	registry.MustRegister(voltageMetric)
 	voltageMetric.Set(healthResult.Voltage)
+
+	return nil
+}
+
+func setInterfacesMetrics(client mikrotik.Client, registry *prometheus.Registry) error {
+	interfaces, err := client.GetInterfaces()
+	if err != nil {
+		return err
+	}
+
+	receivedBytesMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mikrotik_interface_received_bytes",
+		Help: "Number of received bytes",
+	}, []string{"name", "type"})
+	registry.MustRegister(receivedBytesMetric)
+
+	receivedDropMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_received_drop",
+		Help: "Number of received packets being dropped",
+	}, []string{"name", "type"})
+	registry.MustRegister(receivedDropMetric)
+
+	receivedErrorMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_received_error",
+		Help: "Packets received with some kind of an error",
+	}, []string{"name", "type"})
+	registry.MustRegister(receivedErrorMetric)
+
+	receivedPacketsMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_received_packets",
+		Help: "Number of packets received",
+	}, []string{"name", "type"})
+	registry.MustRegister(receivedPacketsMetric)
+
+	transferredBytesMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mikrotik_interface_transferred_bytes",
+		Help: "Number of transmitted bytes.",
+	}, []string{"name", "type"})
+	registry.MustRegister(transferredBytesMetric)
+
+	transferredDropMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_transferred_drop",
+		Help: "Number of transmitted packets being dropped",
+	}, []string{"name", "type"})
+	registry.MustRegister(transferredDropMetric)
+
+	transferredQueueDropMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_transferred_queue_drop",
+		Help: "Number of dropped packets by the interface queue",
+	}, []string{"name", "type"})
+	registry.MustRegister(transferredQueueDropMetric)
+
+	transferredErrorMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_transferred_error",
+		Help: "Packets transmitted with some kind of an error",
+	}, []string{"name", "type"})
+	registry.MustRegister(transferredErrorMetric)
+
+	transferredPacketsMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "mikrotik_interface_transferred_packets",
+		Help: "Number of transmitted packets",
+	}, []string{"name", "type"})
+	registry.MustRegister(transferredPacketsMetric)
+
+	for _, iface := range interfaces {
+		if iface.IsActive() {
+			receivedBytesMetric.WithLabelValues(iface.Name, iface.Type).Set(iface.RxByte)
+			receivedDropMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.RxDrop)
+			receivedErrorMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.RxError)
+			receivedPacketsMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.RxPacket)
+
+			transferredBytesMetric.WithLabelValues(iface.Name, iface.Type).Set(iface.TxByte)
+			transferredDropMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.TxDrop)
+			transferredQueueDropMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.TxQueueDrop)
+			transferredErrorMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.TxError)
+			transferredPacketsMetric.WithLabelValues(iface.Name, iface.Type).Add(iface.TxPacket)
+		}
+	}
 
 	return nil
 }

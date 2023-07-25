@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eatplanted/mikrotik-ros-exporter/internal/mikrotik"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -92,8 +91,20 @@ func TestSkipTLSVerifyHTTPHeader_SetTrue(t *testing.T) {
 		}
 
 		if r.URL.Path == "/rest/system/resource" {
-			json.NewEncoder(w).Encode(mikrotik.Resource{
-				CpuCount: 4,
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"cpu-count": "4",
+			})
+		}
+
+		if r.URL.Path == "/rest/interface" {
+			json.NewEncoder(w).Encode([]interface{}{
+				map[string]interface{}{
+					"name":     "ether1",
+					"tx-byte":  "123",
+					"type":     "ether",
+					"disabled": "false",
+					"running":  "true",
+				},
 			})
 		}
 	}))
@@ -126,6 +137,10 @@ func TestSkipTLSVerifyHTTPHeader_SetTrue(t *testing.T) {
 
 	if !strings.Contains(string(body), "mikrotik_system_resource_cpu_count 4") {
 		t.Errorf("probe request handler returned wrong status code: %s, want %s", body, "mikrotik_system_resource_cpu_count 4")
+	}
+
+	if !strings.Contains(string(body), "mikrotik_interface_transferred_bytes{name=\"ether1\",type=\"ether\"}") {
+		t.Errorf("probe request handler returned wrong status code: %s, want %s", body, "mikrotik_interface_transferred_bytes 123")
 	}
 }
 
