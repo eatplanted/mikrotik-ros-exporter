@@ -17,6 +17,7 @@ type Configuration struct {
 
 type Client interface {
 	GetHealth() (Health, error)
+	GetInterfaces() ([]Interface, error)
 	GetResource() (Resource, error)
 }
 
@@ -40,7 +41,7 @@ func NewClient(configuration Configuration) Client {
 	}
 }
 
-func (c client) get(path string) (*http.Response, error) {
+func (c *client) get(path string) (*http.Response, error) {
 	url := c.buildURL(path)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -52,6 +53,6 @@ func (c client) get(path string) (*http.Response, error) {
 	return c.httpClient.Do(request)
 }
 
-func (c client) buildURL(path string) string {
+func (c *client) buildURL(path string) string {
 	return fmt.Sprintf("%s/rest%s", c.configuration.Address, path)
 }
