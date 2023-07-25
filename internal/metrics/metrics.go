@@ -93,7 +93,7 @@ func setInterfacesMetrics(client mikrotik.Client, registry *prometheus.Registry)
 
 	transferredBytesMetric := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mikrotik_interface_transferred_bytes",
-		Help: "Number of transmitted bytes.",
+		Help: "Number of transmitted bytes",
 	}, []string{"name", "type"})
 	registry.MustRegister(transferredBytesMetric)
 
