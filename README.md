@@ -23,7 +23,7 @@ The timeout is automatically determined from the `scrape_timeout` in the [Promet
 For monitoring purposes, it is recommended to create a new user that has API and read-only access to the Router OS device(s):
 
 ```
-/user group add name=monitoring policy=api,read
+/user group add name=monitoring policy=api,read,rest-api
 /user add name=monitoring group=monitoring password=changeme
 ```
 
@@ -44,8 +44,8 @@ scrape_configs:
       skip_tls_verify: [false]
     static_configs:
       - targets:
-        - https://10.0.1.1
-        - http://10.0.20.1:8081
+          - https://10.0.1.1
+          - http://10.0.20.1:8081
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
